@@ -36,6 +36,7 @@ updated_y = prev_y + distance .* sin(desired_angle/180*pi); % to replace wrongly
 % distance = M(:,6);
 % angle = M(:,7);
 
+
 % figure(1);
 % %scsz = get(0,'ScreenSize');
 % %set(gcf,'Position',scsz);
