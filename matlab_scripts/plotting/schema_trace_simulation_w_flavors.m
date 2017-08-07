@@ -5,8 +5,7 @@
 
 function schema_trace_simulation_w_flavors()
 % arrays of qr positions
-qr_x = [];
-qr_y = [];
+qr_x = []; qr_y = [];
 for i = 0:4
     for j = 0:4
         qr_x(end+1) = 60*i;
