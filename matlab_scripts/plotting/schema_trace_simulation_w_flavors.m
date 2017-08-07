@@ -2,10 +2,13 @@
 %%% Xinyun Zou
 %%% Simulation of the robot's zig zag trace in different schemas with flavors in CARL lab
 %%% Last updated on Aug 7, 2017
+%%% Example of how to run the function:
+%%% [x,y,flavor_ind,flavor_in_order]=schema_trace_simulation_w_flavors('Schema A');
 
-function schema_trace_simulation_w_flavors()
+function [x,y,flavor_ind,flavor_in_order]=schema_trace_simulation_w_flavors(SchemaName)
 % arrays of qr positions
-qr_x = []; qr_y = [];
+qr_x = [];
+qr_y = [];
 for i = 0:4
     for j = 0:4
         qr_x(end+1) = 60*i;
@@ -16,36 +19,6 @@ for i = 0:4
         end
     end
 end
-
-% arrays of coordinates of qr flavors for Schema A
-flavorA_x = [60,240,120,0,120];
-flavorA_y = [240,180,0,60,120];
-flavorA_pos = [flavorA_x; flavorA_y];
-flavorA = {'QR01','QR02','QR03','QR04','QR05'};
-
-% arrays of coordinates of qr flavors for Schema A swapped
-flavorA_swapped_x = [60,120,0,120,240];
-flavorA_swapped_y = [240,0,60,120,180];
-flavorA_swapped_pos = [flavorA_swapped_x; flavorA_swapped_y];
-flavorA_swapped = {'QR01','QR03','QR04','QR05','QR06'};
-
-% arrays of coordinates of qr flavors for Schema A moved
-flavorA_moved_x = [60,240,180,0,120];
-flavorA_moved_y = [240,180,0,60,120];
-flavorA_moved_pos = [flavorA_moved_x; flavorA_moved_y];
-flavorA_moved = {'QR01','QR02','QR03','QR04','QR05'};
-
-% arrays of coordinates of qr flavors for Schema B
-flavorB_x = [60,0,180,60,240];
-flavorB_y = [240,60,60,120,0];
-flavorB_pos = [flavorB_x; flavorB_y];
-flavorB = {'QR01','QR07','QR08','QR09','QR10'};
-
-% arrays of coordinates of qr flavors for Schema C
-flavorC_x = [60,120,240,180,0];
-flavorC_y = [0,240,60,240,120];
-flavorC_pos = [flavorC_x; flavorC_y];
-flavorC = {'QR01','QR02','QR07','QR08','QR10'};
 
 % matrix and cell to store coordinates and labels of the explored qr flavors
 explored_flavor_pos = []; 
@@ -86,11 +59,22 @@ waypoints_x = waypoints_x(2:end);
 waypoints_y = waypoints_y(2:end);
 fprintf('Targeted qr position updated to (%d, %d).\n',dest_qr_x,dest_qr_y);
 
+ind = [];
+ind(end+1) = length(x);
+fprintf('ind = %d, (x,y) = (%f,%f).\n',ind(end),x(end),y(end));
+
+flavor_ind = [];
+
 % start to plot in real-time
-[explored_flavor_pos,explored_flavor]=trace_plot(qr_x,qr_y,...
+[explored_flavor_pos,explored_flavor,new_flavor_added]=trace_plot(qr_x,qr_y,...
     prev_x,prev_y,prev_qr_x,prev_qr_y,dest_qr_x,dest_qr_y,...
-    updated_x,updated_y,flavorA_pos,flavorA,...
-    explored_flavor_pos,explored_flavor,'Schema A');
+    updated_x,updated_y,explored_flavor_pos,explored_flavor,SchemaName);
+
+if (new_flavor_added == true)
+    flavor_ind(end+1) = length(x);
+    fprintf('flavor_ind = %d, flavor = %s, (x,y) = (%f,%f).\n',...
+        flavor_ind(end),explored_flavor{end},x(end),y(end));
+end
 
 % start simulation
 isDone = false; 
@@ -105,7 +89,6 @@ while isRunning && ~isDone
         waypoints_y = waypoints_y(2:end);
         fprintf('Targeted qr position updated to (%d, %d).\n',dest_qr_x,dest_qr_y);
         if isempty(waypoints_x)
-            disp('**********Trial finished**********');
             isDone = true;
         end
     end
@@ -123,6 +106,8 @@ while isRunning && ~isDone
         y(end+1) = updated_y;
         % update the previously explored qr position if reached
         if (abs(dest_qr_x-updated_x)<0.3 && abs(dest_qr_y-updated_y)<0.3)
+            ind(end+1) = length(x);
+            fprintf('ind = %d, (x,y) = (%f,%f).\n',ind(end),x(end),y(end));
             prev_qr_x = dest_qr_x;
             prev_qr_y = dest_qr_y;
             prev_x(end+1) = prev_qr_x;
@@ -130,14 +115,20 @@ while isRunning && ~isDone
             isRunning = true;
         end
         % update plot in real-time
-        [explored_flavor_pos,explored_flavor]=trace_plot(qr_x,qr_y,...
+        [explored_flavor_pos,explored_flavor,new_flavor_added]=trace_plot(qr_x,qr_y,...
             prev_x,prev_y,prev_qr_x,prev_qr_y,dest_qr_x,dest_qr_y,...
-            updated_x,updated_y,flavorA_pos,flavorA,...
-            explored_flavor_pos,explored_flavor,'Schema A');
+            updated_x,updated_y,explored_flavor_pos,explored_flavor,SchemaName);
+        if (new_flavor_added == true)
+            flavor_ind(end+1) = length(x);
+            fprintf('flavor_ind = %d, flavor = %s, (x,y) = (%f,%f).\n',...
+                flavor_ind(end),explored_flavor{end},x(end),y(end));
+        end
         % update while loop counter
         counter = counter+1;
     end
 end
+
+disp('**********Trial finished**********');
 
 % figure(1);clf
 % axis([-10 250 -10 250]);
@@ -180,18 +171,73 @@ end
 % legend(lgd,'Location','bestoutside');
 % hold off
 
+flavor_in_order = zeros(1,length(explored_flavor));
+for i = 1:length(explored_flavor)
+    flavor_in_order(i) = str2double(extractAfter(explored_flavor{i},2));
 end
 
-function [explored_flavor_pos,explored_flavor]=trace_plot(qr_x,qr_y,...
+end
+
+function [explored_flavor_pos,explored_flavor,new_flavor_added]=trace_plot(qr_x,qr_y,...
     prev_x,prev_y,prev_qr_x,prev_qr_y,dest_qr_x,dest_qr_y,updated_x,updated_y,...
-    flavor_pos,flavor,explored_flavor_pos,explored_flavor,SchemaName)
-figure(5);clf
-axis([-10 250 -10 250]);
-axis square;
-hold on
-plot(qr_x,qr_y,'ro',prev_x,prev_y,'go',...
-    dest_qr_x,dest_qr_y,'bo',updated_x,updated_y,'k*');
-lgd = {'qr positions','explored places','targeted place','robot position'};
+    explored_flavor_pos,explored_flavor,SchemaName)
+% arrays of coordinates of qr flavors for Schema A
+flavorA_x = [60,240,120,0,120];
+flavorA_y = [240,180,0,60,120];
+flavorA_pos = [flavorA_x; flavorA_y];
+flavorA = {'QR01','QR02','QR03','QR04','QR05'};
+
+% arrays of coordinates of qr flavors for Schema A swapped
+flavorA_swapped_x = [60,120,0,120,240];
+flavorA_swapped_y = [240,0,60,120,180];
+flavorA_swapped_pos = [flavorA_swapped_x; flavorA_swapped_y];
+flavorA_swapped = {'QR01','QR03','QR04','QR05','QR06'};
+
+% arrays of coordinates of qr flavors for Schema A moved
+flavorA_moved_x = [60,240,180,0,120];
+flavorA_moved_y = [240,180,0,60,120];
+flavorA_moved_pos = [flavorA_moved_x; flavorA_moved_y];
+flavorA_moved = {'QR01','QR02','QR03','QR04','QR05'};
+
+% arrays of coordinates of qr flavors for Schema B
+flavorB_x = [60,0,180,60,240];
+flavorB_y = [240,60,60,120,0];
+flavorB_pos = [flavorB_x; flavorB_y];
+flavorB = {'QR01','QR07','QR08','QR09','QR10'};
+
+% arrays of coordinates of qr flavors for Schema C
+flavorC_x = [60,120,240,180,0];
+flavorC_y = [0,240,60,240,120];
+flavorC_pos = [flavorC_x; flavorC_y];
+flavorC = {'QR01','QR02','QR07','QR08','QR10'};
+
+if (max(strcmp(SchemaName,{'Schema A','SchemaA','Schema_A'}))==true)
+    flavor_pos = flavorA_pos;
+    flavor = flavorA;
+elseif (max(strcmp(SchemaName,{'Schema B','SchemaB','Schema_B'}))==true)
+    flavor_pos = flavorB_pos;
+    flavor = flavorB;
+elseif (max(strcmp(SchemaName,{'Schema C','SchemaC','Schema_C'}))==true)
+    flavor_pos = flavorC_pos;
+    flavor = flavorC;
+elseif (max(strcmp(SchemaName,{'Schema A swapped','SchemaA swapped','Schema_A_swapped'}))==true)
+    flavor_pos = flavorA_swapped_pos;
+    flavor = flavorA_swapped;
+elseif (max(strcmp(SchemaName,{'Schema A moved','SchemaA moved','Schema_A_moved'}))==true)
+    flavor_pos = flavorA_moved_pos;
+    flavor = flavorA_moved;
+else
+    error('Please enter a valid SchemaName.');
+end
+
+new_flavor_added = false;
+% figure(5);clf
+% axis([-10 250 -10 250]);
+% axis square;
+% hold on
+% plot(qr_x,qr_y,'ro',prev_x,prev_y,'go',...
+%     dest_qr_x,dest_qr_y,'bo',updated_x,updated_y,'k*');
+% lgd = {'qr positions','explored places','targeted place','robot position'};
 [Lia,Locb]=ismember([prev_qr_x,prev_qr_y],flavor_pos','rows');
 if (Lia == true)
     if ~isempty(explored_flavor_pos)
@@ -199,20 +245,22 @@ if (Lia == true)
         if (exp_Lia == false)
             explored_flavor_pos(:,end+1)=[prev_qr_x;prev_qr_y];
             explored_flavor{end+1}=flavor{Locb};
+            new_flavor_added = true;
         end
     else
         explored_flavor_pos(:,end+1)=[prev_qr_x;prev_qr_y];
         explored_flavor{end+1}=flavor{Locb};
+        new_flavor_added = true;
     end
 end
-if ~isempty(explored_flavor)
-    for f = 1:length(explored_flavor)
-        plot(explored_flavor_pos(1,f),explored_flavor_pos(2,f),'o');
-    end
-    lgd = [lgd,explored_flavor];
-end
-legend(lgd,'Location','bestoutside');
-title(SchemaName);
-hold off
-pause(1e-8);
+% if ~isempty(explored_flavor)
+%     for f = 1:length(explored_flavor)
+%         plot(explored_flavor_pos(1,f),explored_flavor_pos(2,f),'o');
+%     end
+%     lgd = [lgd,explored_flavor];
+% end
+% legend(lgd,'Location','bestoutside');
+% title(SchemaName);
+% hold off
+% pause(1e-8);
 end
