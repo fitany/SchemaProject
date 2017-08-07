@@ -65,6 +65,7 @@ legend(lgd,'Location','bestoutside');
 title('Position Only (with no flavor)');
 pause(1e-5);
 
+% start simulation
 isDone = false; 
 isRunning = true;
 while isRunning && ~isDone
