@@ -76,12 +76,11 @@ function network = train_schema(schema,network,params,t_per_pair,t_pairs,has_hip
     size_wells = params.size_wells;
     size_flavors = params.size_flavors;
     for p = 1:t_pairs
-        n_well = zeros(size_wells,1); % input neurons for location
-        n_flavor = zeros(size_flavors,1); % input neurons for flavor
+        network.n_well = zeros(size_wells,1); % input neurons for location
+        network.n_flavor = zeros(size_flavors,1); % input neurons for flavor
         i = randi(params.size_pairs);
-        n_well(schema(i,1)) = n_well(schema(i,1)) + .1;
-        n_flavor(schema(i,2)) = n_flavor(schema(i,2)) + .1;
-        network = run_network(n_well,n_flavor,network,params,true,t_per_pair,has_hipp,sigm,disp_on);
+        network.n_well(schema(i,1)) = network.n_well(schema(i,1)) + .1;
+        network.n_flavor(schema(i,2)) = network.n_flavor(schema(i,2)) + .1;
+        network = run_network(network,params,true,t_per_pair,has_hipp,sigm,disp_on);
     end
 end
-
