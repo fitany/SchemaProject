@@ -38,8 +38,9 @@ function reproduce_tse()
     sigm = 1;
     
     %Initializing neurons and weights
-    network.n_well = zeros(params.size_wells,1); % input neurons for location, 1st half of input
-    network.n_flavor = zeros(params.size_flavors,1); % input neurons for flavor, 2nd half of input
+    network.n_well = zeros(params.size_wells,1); % input current for location, 1st half of input
+    network.n_flavor = zeros(params.size_flavors,1); % input current for flavor, 2nd half of input
+    network.n_input = zeros(numel(network.n_well)+numel(network.n_flavor),1); % layer receiving input
     network.n_multimodal = zeros(params.size_multimodal,1);
     network.n_buffer = zeros(numel(network.n_multimodal),1);
     network.n_pfc = rand(params.size_pfc,1).*.1; % output neurons for schema
@@ -66,10 +67,37 @@ function reproduce_tse()
         performances(trial) = performance;
         %}
     end
+    %for trial = 1:num_trials
+    %    network = train_schema(schemaB,network,params,t_per_pair,t_pairs,has_hipp,sigm,disp_on);
+    %end
     for trial = 1:num_trials
-        network = train_schema(schemaB,network,params,t_per_pair,t_pairs,has_hipp,sigm,disp_on);
+        network = test_schema(schemaA,network,params,t_per_pair,t_pairs,has_hipp,sigm,disp_on);
     end
     %performances
+end
+function network = test_schema(schema,network,params,t_per_pair,t_pairs,has_hipp,sigm,disp_on)
+    size_wells = params.size_wells;
+    size_flavors = params.size_flavors;
+    size_pairs = params.size_pairs;
+    for p = 1:t_pairs
+        n_well = zeros(size_wells,1); % input neurons for location
+        n_flavor = zeros(size_flavors,1); % input neurons for flavor
+        i = randi(params.size_pairs);
+        n_well(schema(i,1)) = n_well(schema(i,1)) + .1;
+        n_flavor(schema(i,2)) = n_flavor(schema(i,2)) + .1;
+        network.n_well = n_well;
+        network.n_flavor = n_flavor;
+        network = run_network(n_well,n_flavor,network,params,true,t_per_pair,has_hipp,sigm,disp_on);
+    end
+    for p = 1:size_pairs
+        n_well = zeros(size_wells,1); % input neurons for location
+        n_flavor = zeros(size_flavors,1); % input neurons for flavor
+        i = p;
+        n_flavor(schema(i,2)) = n_flavor(schema(i,2)) + .1;
+        network.n_well = n_well;
+        network.n_flavor = n_flavor;
+        network = run_network_retrieval_simple(network,params,t_per_pair,has_hipp,sigm,disp_on);
+    end
 end
 
 function network = train_schema(schema,network,params,t_per_pair,t_pairs,has_hipp,sigm,disp_on)
@@ -81,6 +109,8 @@ function network = train_schema(schema,network,params,t_per_pair,t_pairs,has_hip
         i = randi(params.size_pairs);
         n_well(schema(i,1)) = n_well(schema(i,1)) + .1;
         n_flavor(schema(i,2)) = n_flavor(schema(i,2)) + .1;
+        network.n_well = n_well;
+        network.n_flavor = n_flavor;
         network = run_network(n_well,n_flavor,network,params,true,t_per_pair,has_hipp,sigm,disp_on);
     end
 end
