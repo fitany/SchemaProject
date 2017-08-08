@@ -1,4 +1,4 @@
-function network = run_network(n_well,n_flavor,network,params,is_learning,t_per_pair,has_hipp,sigm,disp_on)
+function network = run_network(network,params,is_learning,t_per_pair,has_hipp,sigm,disp_on)
     size_pfc = params.size_pfc;
     size_hipp = params.size_hipp;
     size_multimodal = params.size_multimodal;
@@ -24,6 +24,8 @@ function network = run_network(n_well,n_flavor,network,params,is_learning,t_per_
     n_buffer = network.n_buffer;
     n_pfc = network.n_pfc;
     n_hipp = network.n_hipp;
+    n_well = network.n_well; % added 
+    n_flavor = network.n_flavor; % added
     
     %Input current for schema 1
     input_current = [n_well; n_flavor];
@@ -96,6 +98,8 @@ function network = run_network(n_well,n_flavor,network,params,is_learning,t_per_
         end
 
         if disp_on
+            figure(1);
+            set(gcf,'Position',get(0,'ScreenSize'));
             subplot(3,3,1);
             imagesc([n_well;n_flavor]);
             title('n input');
