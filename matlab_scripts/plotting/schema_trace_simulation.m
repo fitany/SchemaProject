@@ -54,18 +54,21 @@ waypoints_x = waypoints_x(2:end);
 waypoints_y = waypoints_y(2:end);
 fprintf('Targeted qr position updated to (%d, %d).\n',dest_qr_x,dest_qr_y);
 
-% start to plot in real-time
-figure(4);clf
-plot(qr_x,qr_y,'ro',prev_x,prev_y,'go',...
-    dest_qr_x,dest_qr_y,'bo',updated_x,updated_y,'k*');
-axis([-10 250 -10 250]);
-axis square;
-lgd = {'qr positions','explored places','targeted place','robot position'};
-legend(lgd,'Location','bestoutside');
-title('Position Only (with no flavor)');
-pause(1e-5);
+ind = [];
+ind(end+1) = length(x);
+fprintf('ind = %d, (x,y) = (%f,%f).\n',length(x),x(end),y(end));
 
-% start simulation
+% % start to plot in real-time
+% figure(4);clf
+% plot(qr_x,qr_y,'ro',prev_x,prev_y,'go',...
+%     dest_qr_x,dest_qr_y,'bo',updated_x,updated_y,'k*');
+% axis([-10 250 -10 250]);
+% axis square;
+% lgd = {'qr positions','explored places','targeted place','robot position'};
+% legend(lgd,'Location','bestoutside');
+% title('Position Only (with no flavor)');
+% pause(1e-5);
+
 isDone = false; 
 isRunning = true;
 while isRunning && ~isDone
@@ -96,22 +99,26 @@ while isRunning && ~isDone
         y(end+1) = updated_y;
         % update the previously explored qr position if reached
         if (abs(dest_qr_x-updated_x)<0.3 && abs(dest_qr_y-updated_y)<0.3)
+            ind(end+1) = length(x);
+            fprintf('ind = %d, (x,y) = (%f,%f).\n',length(x),x(end),y(end));
             prev_qr_x = dest_qr_x;
             prev_qr_y = dest_qr_y;
             prev_x(end+1) = prev_qr_x;
             prev_y(end+1) = prev_qr_y;
             isRunning = true;
         end
-        % update plot in real-time
-        figure(4);clf
-        plot(qr_x,qr_y,'ro',prev_x,prev_y,'go',...
-            dest_qr_x,dest_qr_y,'bo',updated_x,updated_y,'k*');
-        axis([-10 250 -10 250]);
-        axis square;
-        lgd = {'qr positions','explored places','targeted place','robot position'};
-        legend(lgd,'Location','bestoutside');
-        title('Position Only (with no flavor)');
-        pause(1e-5);
+%         % update plot in real-time
+%         figure(4);clf
+%         plot(qr_x,qr_y,'ro',prev_x,prev_y,'go',...
+%             dest_qr_x,dest_qr_y,'bo',updated_x,updated_y,'k*');
+%         axis([-10 250 -10 250]);
+%         axis square;
+%         lgd = {'qr positions','explored places','targeted place','robot position'};
+%         legend(lgd,'Location','bestoutside');
+%         xticks(unique(qr_x));
+%         yticks(unique(qr_y));
+%         title('Position Only (with no flavor)');
+%         pause(1e-5);
         % update while loop counter
         counter = counter+1;
     end
@@ -125,23 +132,29 @@ end
 %     plot(qr_x(i),qr_y(i),'ro');
 %     pause(0.1);
 % end
+% xticks(unique(qr_x));
+% yticks(unique(qr_y));
 % hold off
-% 
-% figure(2);clf
-% axis([-10 250 -10 250]);
-% axis square
-% hold on
-% plot(qr_x,qr_y,'ro');
-% for i = 1:length(x)
-%     plot(x(i),y(i),'k*');
-%     pause(0.001);
-% end
-% hold off
-% 
+
+figure(2);clf
+axis([-10 250 -10 250]);
+axis square
+hold on
+plot(qr_x,qr_y,'ro');
+for i = 1:length(x)
+    plot(x(i),y(i),'k*');
+    pause(0.001);
+end
+xticks(unique(qr_x));
+yticks(unique(qr_y));
+hold off
+
 % for i = 1:length(x)
 %     figure(3);clf
 %     plot(qr_x,qr_y,'ro',x(i),y(i),'k*');
 %     axis([-10 250 -10 250]);
 %     axis square
+%     xticks(unique(qr_x));
+%     yticks(unique(qr_y));
 %     pause(0.001);
 % end
