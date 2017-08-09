@@ -1,4 +1,4 @@
-%%% schema_trace_simulation_w_flavors.m
+%%% schema_trace_simulation_w_network.m
 %%% Xinyun Zou
 %%% Simulation of the robot's zig zag trace with neural network added
 %%% Last updated on Aug 7, 2017
