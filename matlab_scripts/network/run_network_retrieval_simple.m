@@ -1,5 +1,7 @@
-% Reverses the weights, inputting to mPFC and 
+% Reverses the weights, input->pfc->buffer->multimodal->well and flavor
+% Input with flavor and schema to retrieve location
 function network = run_network_retrieval_simple(network,params,t_per_pair,has_hipp,sigm,disp_on)
+    size_wells = params.size_wells;
     size_pfc = params.size_pfc;
     size_hipp = params.size_hipp;
     size_multimodal = params.size_multimodal;
@@ -32,61 +34,27 @@ function network = run_network_retrieval_simple(network,params,t_per_pair,has_hi
     input_current = [n_well; n_flavor];
 
     for t = 1:t_per_pair
+        %Update input buffer neurons
+        if sigm
+            n_buffer = 2.*sigmoid(w_buffer_pfc'*n_pfc,gain)-1; %activation
+        else
+            n_buffer = max(w_buffer_pfc'*n_pfc,0); %activation
+        end
         %Update multimodal neurons
         if sigm
-            n_multimodal_new = 2.*sigmoid(w_input_multimodal*input_current,gain)-1; %activation
+            n_multimodal = 2.*sigmoid(w_input_multimodal*input_current + n_buffer,gain)-1; %activation
         else
-            n_multimodal_new = max(w_input_multimodal*input_current,0); %activation
+            n_multimodal = max(w_input_multimodal*input_current + n_buffer,0); %activation
         end
-        [max_multimodal,mInd] = max(n_multimodal_new);
-        if max_multimodal > 0
-            n_multimodal_new = -multimodal_inhibition .* ones(size_multimodal,1);
-            n_multimodal_new(mInd) = multimodal_excitation;
-        end
-
-        %Update input buffer neurons
-        if has_hipp
-            if sigm
-                n_buffer_new = 2.*sigmoid(.99 .* n_buffer + n_multimodal + w_buffer_hipp'*n_hipp,gain)-1; %activation
-            else
-                n_buffer_new = max(.99 .* n_buffer + n_multimodal +  w_buffer_hipp'*n_hipp,0); %activation
-            end
+        %Update input neurons
+        if sigm
+            n_input = 2.*sigmoid(w_input_multimodal'*n_multimodal,gain)-1; %activation
         else
-            if sigm
-                n_buffer_new = 2.*sigmoid(.99 .* n_buffer + n_multimodal,gain)-1; %activation
-            else
-                n_buffer_new = max(.99 .* n_buffer + n_multimodal,0); %activation
-            end
+            n_input = max(w_input'*n_multimodal,0); %activation
         end
-        %Update pfc neurons
-        if has_hipp
-            if sigm
-                n_pfc_new = 2.*sigmoid(w_buffer_pfc * n_buffer + 2.*w_pfc_hipp' * n_hipp,gain)-1; %activation
-            else
-                n_pfc_new = max(w_buffer_pfc * n_buffer + 2.*w_pfc_hipp' * n_hipp,0); %activation
-            end
-        else
-            n_pfc_new = 2.*sigmoid(w_buffer_pfc * n_buffer,gain)-1; %activation
-        end
-        [max_pfc,mInd] = max(n_pfc_new);
-        if max_pfc > 0
-            n_pfc_new = -pfc_inhibition * ones(size_pfc,1);
-            n_pfc_new(mInd) = pfc_excitation;
-        end
-        %Update hipp neurons
-        if has_hipp
-            if sigm
-                n_hipp_new = 2.*sigmoid(w_pfc_hipp * n_pfc + w_buffer_hipp * n_buffer,gain)-1; %activation
-            else
-                n_hipp_new = max(w_pfc_hipp * n_pfc + w_buffer_hipp * n_buffer,0); %activation
-            end
-            %mInd = schema(i,1); % external gps signal
-            [max_hipp,mInd] = max(n_hipp_new);
-            if max_hipp > 0
-                n_hipp_new = -hipp_inhibition * ones(size_hipp,1);
-                n_hipp_new(mInd) = hipp_excitation;
-            end
-        end
+        
+        n_well = n_input(1:size_wells);
+        n_flavor = n_input(size_wells+1:end);
 
         if disp_on
             subplot(3,3,1);
@@ -120,14 +88,16 @@ function network = run_network_retrieval_simple(network,params,t_per_pair,has_hi
         end
     end
 
-    network.w_input_multimodal = w_input_multimodal_new;
-    network.w_buffer_pfc = w_buffer_pfc_new;
-    network.w_pfc_hipp = w_pfc_hipp_new;
-    network.w_buffer_hipp = w_buffer_hipp_new;
-    network.n_multimodal = n_multimodal_new;
-    network.n_buffer = n_buffer_new;
-    network.n_pfc = n_pfc_new;
-    network.n_hipp = n_hipp_new;
+    network.w_input_multimodal = w_input_multimodal;
+    network.w_buffer_pfc = w_buffer_pfc;
+    network.w_pfc_hipp = w_pfc_hipp;
+    network.w_buffer_hipp = w_buffer_hipp;
+    network.n_well = n_well;
+    network.n_flavor = n_flavor;
+    network.n_multimodal = n_multimodal;
+    network.n_buffer = n_buffer;
+    network.n_pfc = n_pfc;
+    network.n_hipp = n_hipp;
 end
 
 function gain = sigmoid(x,k)
