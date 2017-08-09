@@ -237,13 +237,6 @@ else
 end
 
 new_flavor_added = false;
-% figure(5);clf
-% axis([-10 250 -10 250]);
-% axis square;
-% hold on
-% plot(qr_x,qr_y,'ro',prev_x,prev_y,'go',...
-%     dest_qr_x,dest_qr_y,'bo',updated_x,updated_y,'k*');
-% lgd = {'qr positions','explored places','targeted place','robot position'};
 [Lia,Locb]=ismember([prev_qr_x,prev_qr_y],flavor_pos','rows');
 if (Lia == true)
     if ~isempty(explored_flavor_pos)
@@ -259,6 +252,13 @@ if (Lia == true)
         new_flavor_added = true;
     end
 end
+% figure(5);clf
+% axis([-10 250 -10 250]);
+% axis square;
+% hold on
+% plot(qr_x,qr_y,'ro',prev_x,prev_y,'go',...
+%     dest_qr_x,dest_qr_y,'bo',updated_x,updated_y,'k*');
+% lgd = {'qr positions','explored places','targeted place','robot position'};
 % if ~isempty(explored_flavor)
 %     for f = 1:length(explored_flavor)
 %         plot(explored_flavor_pos(1,f),explored_flavor_pos(2,f),'o');
