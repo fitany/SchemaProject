@@ -64,6 +64,7 @@ ind(end+1) = length(x);
 fprintf('ind = %d, (x,y) = (%f,%f).\n',ind(end),x(end),y(end));
 
 flavor_ind = [];
+flavor_in_order = [];
 
 % start to plot in real-time
 [explored_flavor_pos,explored_flavor,new_flavor_added]=trace_plot(qr_x,qr_y,...
@@ -72,6 +73,7 @@ flavor_ind = [];
 
 if (new_flavor_added == true)
     flavor_ind(end+1) = length(x);
+    flavor_in_order(end+1) = str2double(extractAfter(explored_flavor{end},2));
     fprintf('flavor_ind = %d, flavor = %s, (x,y) = (%f,%f).\n',...
         flavor_ind(end),explored_flavor{end},x(end),y(end));
 end
@@ -120,6 +122,7 @@ while isRunning && ~isDone
             updated_x,updated_y,explored_flavor_pos,explored_flavor,SchemaName);
         if (new_flavor_added == true)
             flavor_ind(end+1) = length(x);
+            flavor_in_order(end+1) = str2double(extractAfter(explored_flavor{end},2));
             fprintf('flavor_ind = %d, flavor = %s, (x,y) = (%f,%f).\n',...
                 flavor_ind(end),explored_flavor{end},x(end),y(end));
         end
@@ -138,6 +141,8 @@ disp('**********Trial finished**********');
 %     plot(qr_x(i),qr_y(i),'ro');
 %     pause(0.1);
 % end
+% xticks(unique(qr_x));
+% yticks(unique(qr_y));
 % hold off
 
 % figure(2);clf
@@ -149,6 +154,8 @@ disp('**********Trial finished**********');
 %     plot(x(i),y(i),'k*');
 %     pause(0.001);
 % end
+% xticks(unique(qr_x));
+% yticks(unique(qr_y));
 % hold off
 
 % for i = 1:length(x)
@@ -156,6 +163,8 @@ disp('**********Trial finished**********');
 %     plot(qr_x,qr_y,'ro',x(i),y(i),'k*');
 %     axis([-10 250 -10 250]);
 %     axis square
+%     xticks(unique(qr_x));
+%     yticks(unique(qr_y));
 %     pause(0.001);
 % end
 
@@ -169,12 +178,9 @@ disp('**********Trial finished**********');
 % end
 % lgd = ['qr positions',flavorA];
 % legend(lgd,'Location','bestoutside');
+% xticks(unique(qr_x));
+% yticks(unique(qr_y));
 % hold off
-
-flavor_in_order = zeros(1,length(explored_flavor));
-for i = 1:length(explored_flavor)
-    flavor_in_order(i) = str2double(extractAfter(explored_flavor{i},2));
-end
 
 end
 
@@ -260,6 +266,8 @@ end
 %     lgd = [lgd,explored_flavor];
 % end
 % legend(lgd,'Location','bestoutside');
+% xticks(unique(qr_x));
+% yticks(unique(qr_y));
 % title(SchemaName);
 % hold off
 % pause(1e-8);
