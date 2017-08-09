@@ -154,6 +154,8 @@ disp('**********Trial finished**********');
 %     plot(qr_x(i),qr_y(i),'ro');
 %     pause(0.1);
 % end
+% xticks(unique(qr_x));
+% yticks(unique(qr_y));
 % hold off
 
 % figure(2);clf
@@ -165,6 +167,8 @@ disp('**********Trial finished**********');
 %     plot(x(i),y(i),'k*');
 %     pause(0.001);
 % end
+% xticks(unique(qr_x));
+% yticks(unique(qr_y));
 % hold off
 
 % for i = 1:length(x)
@@ -172,6 +176,8 @@ disp('**********Trial finished**********');
 %     plot(qr_x,qr_y,'ro',x(i),y(i),'k*');
 %     axis([-10 250 -10 250]);
 %     axis square
+%     xticks(unique(qr_x));
+%     yticks(unique(qr_y));
 %     pause(0.001);
 % end
 
@@ -185,6 +191,8 @@ disp('**********Trial finished**********');
 % end
 % lgd = ['qr positions',flavorA];
 % legend(lgd,'Location','bestoutside');
+% xticks(unique(qr_x));
+% yticks(unique(qr_y));
 % hold off
 
 end
@@ -271,6 +279,8 @@ end
 %     lgd = [lgd,explored_flavor];
 % end
 % legend(lgd,'Location','bestoutside');
+% xticks(unique(qr_x));
+% yticks(unique(qr_y));
 % title(SchemaName);
 % hold off
 % pause(1e-8);
