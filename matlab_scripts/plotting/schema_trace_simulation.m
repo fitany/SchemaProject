@@ -92,7 +92,7 @@ while isRunning && ~isDone
     % use a while loop to update robot's position when it's approaching the
     % targeted position
     counter = 0;
-    while (counter < ceil(4.46*60))
+    while (counter < ceil(4.46*norm([vectorX;vectorY])))
         updated_x = prev_qr_x + counter / 4.46 * cos(desired_angle);
         updated_y = prev_qr_y + counter / 4.46 * sin(desired_angle);
         x(end+1) = updated_x;
