@@ -1,11 +1,11 @@
-function network = network_tse(flavor_ind,flavor_in_order,network)
+function network = network_tse(schema,network,always)
     %Schemas (place,flavor)
-    schema = [flavor_ind;flavor_in_order]';
+    %schema = [flavor_ind;flavor_in_order]';
 
     %Neuron sizes
-    params.size_wells = 6433; %length(x);%25;
+    params.size_wells = 25;%6433; %length(x);%25;
     params.size_flavors = 10;
-    params.size_pairs = length(flavor_ind);%5;
+    %params.size_pairs = length(schema.simple_flavor_ind);%5;
     params.size_pfc = 10;
     params.size_hipp = 49;
     params.size_multimodal = 50;
@@ -49,8 +49,15 @@ function network = network_tse(flavor_ind,flavor_in_order,network)
     %Figure 2A
     network.n_well = zeros(params.size_wells,1); % input neurons for location
     network.n_flavor = zeros(params.size_flavors,1); % input neurons for flavor
-    network.n_well(schema(end,1)) = network.n_well(schema(end,1)) + .1;
-    network.n_flavor(schema(end,2)) = network.n_flavor(schema(end,2)) + .1;
-    network = run_network(network,params,true,t_per_pair,has_hipp,sigm,disp_on);
-
+    if schema.simple_flavor_ind(end) ~= 0
+        network.n_well(schema.simple_flavor_ind(end)) = network.n_well(schema.simple_flavor_ind(end)) + .1;
+    end
+    if schema.simple_flavor_in_order(end) ~= 0
+        network.n_flavor(schema.simple_flavor_in_order(end)) = network.n_flavor(schema.simple_flavor_in_order(end)) + .1;
+    end
+    if always
+        network = run_network_always(network,params,true,t_per_pair,has_hipp,sigm,disp_on);
+    else
+        network = run_network(network,params,true,t_per_pair,has_hipp,sigm,disp_on);
+    end
 end
