@@ -15,10 +15,10 @@ function reproduce_tse()
     params.size_multimodal = 50;
     
     %Learning parameters
-    params.lr_slow = .001; %.001
-    params.lr_fast = .2; %.2
+    params.lr_slow = .01; %.01 %.001
+    params.lr_fast = .3; %.3 %.2
     params.alpha_multimodal = .2;
-    params.alpha_pfc = 5; %2
+    params.alpha_pfc = 2; %2
     params.alpha_hipp = 1; %1
     params.multimodal_excitation = 1;
     params.multimodal_inhibition = 0;
@@ -33,7 +33,7 @@ function reproduce_tse()
     t_pairs = 20;
     
     %Testing conditions
-    has_hipp = 0;
+    has_hipp = 1;
     disp_on = 1;
     sigm = 1;
     
@@ -98,6 +98,7 @@ function performance = test_schema(schema,network,params,t_per_pair,t_pairs,has_
         well_locations = schema(:,1);
         all_predictions = network.n_well./sum(network.n_well);
         well_predictions = all_predictions(well_locations)./sum(all_predictions(well_locations));
+        well_predictions = exp(100.*well_predictions)./sum(exp(100.*well_predictions)); % applied softmax
         performance = performance + well_predictions(i);
         fprintf('Expected location: %d, Predictions: %d:%1.2f,%d:%1.2f,%d:%1.2f,%d:%1.2f,%d:%1.2f\n',schema(i,1),well_locations(1),well_predictions(1),well_locations(2),well_predictions(2),well_locations(3),well_predictions(3),well_locations(4),well_predictions(4),well_locations(5),well_predictions(5))
     end
@@ -109,10 +110,8 @@ function network = train_schema(schema,network,params,t_per_pair,t_pairs,has_hip
     size_flavors = params.size_flavors;
     pair_order = randperm(params.size_pairs);
     for p = 1:params.size_pairs
-    %for p = 1:t_pairs
         network.n_well = zeros(size_wells,1); % input neurons for location
         network.n_flavor = zeros(size_flavors,1); % input neurons for flavor
-        %i = randi(params.size_pairs);
         i=pair_order(p);
         network.n_well(schema(i,1)) = network.n_well(schema(i,1)) + .1;
         network.n_flavor(schema(i,2)) = network.n_flavor(schema(i,2)) + .1;
